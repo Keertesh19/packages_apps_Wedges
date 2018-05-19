@@ -16,6 +16,7 @@
 
 package com.potato.wedges.fragments;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.os.Bundle;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
@@ -29,25 +30,52 @@ import com.android.internal.logging.nano.MetricsProto;
 
 public class LockscreenFragment extends SettingsPreferenceFragment implements Preference.OnPreferenceChangeListener {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    private static final String KEY_LOCKSCREEN_CLOCK_SELECTION = "lockscreen_clock_selection";
+    private static final String KEY_LOCKSCREEN_DATE_SELECTION = "lockscreen_date_selection";
+
+    private ListPreference mLockscreenClockSelection;
+    private ListPreference mLockscreenDateSelection;
+
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.lockscreen_main);
 
+     ContentResolver resolver = getActivity().getContentResolver();
+
+        mLockscreenClockSelection = (ListPreference) findPreference(KEY_LOCKSCREEN_CLOCK_SELECTION);
+        int clockSelection = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_CLOCK_SELECTION, 0, UserHandle.USER_CURRENT);
+        mLockscreenClockSelection.setValue(String.valueOf(clockSelection));
+        mLockscreenClockSelection.setSummary(mLockscreenClockSelection.getEntry());
+        mLockscreenClockSelection.setOnPreferenceChangeListener(this);
+
+        mLockscreenDateSelection = (ListPreference) findPreference(KEY_LOCKSCREEN_DATE_SELECTION);
+        int dateSelection = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_DATE_SELECTION, 0, UserHandle.USER_CURRENT);
+        mLockscreenDateSelection.setValue(String.valueOf(dateSelection));
+        mLockscreenDateSelection.setSummary(mLockscreenDateSelection.getEntry());
+        mLockscreenDateSelection.setOnPreferenceChangeListener(this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        final String key = preference.getKey();
+        ContentResolver resolver = getActivity().getContentResolver();
+        if (preference == mLockscreenClockSelection) {
+            int clockSelection = Integer.valueOf((String) newValue);
+            int index = mLockscreenClockSelection.findIndexOfValue((String) newValue);
+            Settings.System.putIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_CLOCK_SELECTION, clockSelection, UserHandle.USER_CURRENT);
+            mLockscreenClockSelection.setSummary(mLockscreenClockSelection.getEntries()[index]);
+            return true;
+        } else if (preference == mLockscreenDateSelection) {
+            int dateSelection = Integer.valueOf((String) newValue);
+            int index = mLockscreenDateSelection.findIndexOfValue((String) newValue);
+            Settings.System.putIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_DATE_SELECTION, dateSelection, UserHandle.USER_CURRENT);
+            mLockscreenDateSelection.setSummary(mLockscreenDateSelection.getEntries()[index]);
+            return true;
+        }
         return false;
     }
 
