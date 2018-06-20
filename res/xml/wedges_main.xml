@@ -52,6 +52,13 @@
         android:icon="@drawable/ic_notification_settings" />
 
     <Preference
+        android:key="lockscreen_settings"
+        android:title="@string/lockscreen_main"
+        android:summary="@string/lockscreen_main_summary"
+        android:fragment="com.potato.wedges.fragments.LockscreenFragment"
+        android:icon="@drawable/ic_lockscreen_settings" />
+
+    <Preference
         android:key="gestures_settings"
         android:title="@string/gestures_main"
         android:summary="@string/gestures_main_summary"
